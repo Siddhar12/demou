@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
   <title>For Rucha ✨</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -32,6 +32,7 @@
       color: var(--text);
       overflow-x:hidden;
       touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
     }
 
     /* --- Ambient background --- */
@@ -72,7 +73,15 @@
     }
 
     /* --- Layout --- */
-    .container{ width:min(980px, 92vw); margin:0 auto; }
+    .container{ 
+      width:min(980px, 92vw); margin:0 auto; 
+      transition: opacity 1.5s ease; /* Slow fade out */
+    }
+    .container.fade-out {
+        opacity: 0;
+        pointer-events: none;
+    }
+
     section{ padding: clamp(56px, 7vw, 90px) 0; }
 
     .card{
@@ -502,7 +511,7 @@
       z-index: 1500;
     }
 
-    /* --- POTLU POPUP --- */
+    /* --- POTLU & DAVID POPUPS --- */
     .potluOverlay{
       position:fixed; inset:0;
       z-index: 9500;
@@ -614,6 +623,40 @@
       border-color: rgba(255, 50, 50, 0.4);
     }
 
+    /* --- FINAL POEM OVERLAY --- */
+    .finalPoemOverlay {
+        position: fixed; inset: 0;
+        z-index: 12000;
+        background: transparent;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        pointer-events: none; /* let confetti be clicked if wanted */
+    }
+    .finalPoemOverlay.show { display: flex; }
+
+    .poemBox {
+        text-align: center;
+        color: var(--gold2);
+        font-family: 'Inter', sans-serif; /* Clean font for Marathi */
+        font-size: clamp(18px, 4vw, 26px);
+        line-height: 1.8;
+        padding: 20px;
+        text-shadow: 0 4px 10px rgba(0,0,0,0.8);
+        max-width: 90%;
+    }
+    .poemLine {
+        display: block;
+        opacity: 0;
+        transform: translateY(20px);
+        transition: opacity 1s ease, transform 1s ease;
+        margin-bottom: 12px;
+    }
+    .poemLine.visible {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
     @media (prefers-reduced-motion: reduce){
       *{ animation:none !important; transition:none !important; }
       .aurora{ display:none; }
@@ -661,7 +704,7 @@
     <button class="btn close-game" id="closeGameBtn">Give Up</button>
   </div>
 
-  <main class="container">
+  <main class="container" id="mainContainer">
     <section class="hero">
       <div class="hero-inner">
         <div class="title">Happy Birthday</div>
@@ -754,7 +797,6 @@
               May this year treat you gently — and may you always feel proud of the person you’re becoming.<br/><br/>
               Always cheering for you,<br/>
               your Bugdi Lover ,<br/>
-              Sid
               <span style="font-family:Allura,cursive; font-size:40px;">Sid</span>
             </div>
 
@@ -778,6 +820,26 @@
         <button class="btn" id="potluCloseBtn">Continue ✨</button>
       </div>
     </div>
+  </div>
+
+  <div class="potluOverlay" id="davidOverlay" role="dialog" aria-modal="true" aria-label="Happy Birthday from David">
+    <div class="potluCard">
+      <div class="potluTop">
+        <div class="potluTitle" style="font-size: 38px;">Happy Birthday</div>
+        <div class="potluText">from David 📱</div>
+      </div>
+      <div class="potluImgWrap">
+        <img class="potluImg" src="./david.jpg" alt="David">
+      </div>
+      <div class="potluActions">
+        <button class="btn" id="davidCloseBtn">Thanks David! ✨</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="finalPoemOverlay" id="finalPoemOverlay">
+      <div class="poemBox" id="poemBox">
+          </div>
   </div>
 
   <script>
@@ -819,6 +881,7 @@
           this.confettiParticles = [];
           this.maxSpark = 220;
           this.maxConfetti = 520;
+          this.infiniteConfetti = false; 
           this.resize();
           window.addEventListener("resize", () => this.resize());
           this.loop = this.loop.bind(this);
@@ -868,6 +931,10 @@
           }
         }
 
+        startInfiniteConfetti() {
+            this.infiniteConfetti = true;
+        }
+
         loop(){
           const w = window.innerWidth;
           const h = window.innerHeight;
@@ -889,6 +956,11 @@
           }
 
           this.cctx.clearRect(0, 0, w, h);
+          
+          if (this.infiniteConfetti && Math.random() > 0.8) {
+              this.confettiBurst(Math.random() * w, -20, 5);
+          }
+
           for (let i = this.confettiParticles.length - 1; i >= 0; i--){
             const p = this.confettiParticles[i];
             p.vy += p.g;
@@ -928,25 +1000,36 @@
           this.items = [];
           this.lastTime = 0;
           this.spawnTimer = 0;
+          this.clickParticles = [];
           
+          this.dpr = Math.max(1, window.devicePixelRatio || 1);
+
           this.closeBtn.addEventListener("click", () => this.stop());
           this.canvas.addEventListener("pointerdown", (e) => this.handleTap(e));
           
+          window.addEventListener("resize", () => this.resize());
           this.resize();
         }
         
         resize(){
-          this.canvas.width = window.innerWidth;
-          this.canvas.height = window.innerHeight;
+          const w = window.innerWidth;
+          const h = window.innerHeight;
+          this.canvas.width = w * this.dpr;
+          this.canvas.height = h * this.dpr;
+          this.canvas.style.width = w + "px";
+          this.canvas.style.height = h + "px";
+          this.ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
         }
 
         start(){
           this.active = true;
           this.score = 0;
           this.items = [];
+          this.clickParticles = [];
           this.scoreEl.textContent = "0";
           this.overlay.classList.add("show");
           this.lastTime = performance.now();
+          this.resize();
           requestAnimationFrame((t) => this.loop(t));
         }
 
@@ -959,47 +1042,41 @@
         spawn(){
           const type = Math.random() > 0.3 ? '🍰' : '🥦';
           this.items.push({
-            x: Math.random() * (this.canvas.width - 50) + 25,
-            y: -50,
+            x: Math.random() * (window.innerWidth - 60) + 30,
+            y: -80,
             type: type,
-            speed: Math.random() * 2 + 2,
-            size: 40
+            speed: Math.random() * 3 + 3,
+            size: 60
           });
         }
 
         handleTap(e){
+          e.preventDefault();
           const rect = this.canvas.getBoundingClientRect();
           const x = e.clientX - rect.left;
           const y = e.clientY - rect.top;
-          
+
+          this.clickParticles.push({x, y, life: 10});
+
           for(let i = this.items.length - 1; i >= 0; i--){
             const item = this.items[i];
             const dist = Math.hypot(x - item.x, y - item.y);
             
-            if(dist < 50){
-              // Hit!
+            if(dist < 75){
               if(item.type === '🍰'){
                 this.score++;
                 this.scoreEl.textContent = this.score;
-                this.createExplosion(item.x, item.y, '✨');
-                if(this.score >= 10){
-                  this.win();
-                }
+                if(this.score >= 10) this.win();
               } else {
                 this.score = Math.max(0, this.score - 1);
                 this.scoreEl.textContent = this.score;
-                this.createExplosion(item.x, item.y, '🤮');
                 this.canvas.style.transform = "translateX(5px)";
                 setTimeout(()=> this.canvas.style.transform = "none", 50);
               }
               this.items.splice(i, 1);
-              return; // one item per tap
+              return; 
             }
           }
-        }
-        
-        createExplosion(x, y, char){
-          // simple visual feedback 
         }
 
         win(){
@@ -1013,29 +1090,36 @@
           const dt = (time - this.lastTime) / 16;
           this.lastTime = time;
 
-          this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+          const w = window.innerWidth;
+          const h = window.innerHeight;
+
+          this.ctx.clearRect(0, 0, w, h);
           
-          // Spawn
           this.spawnTimer++;
-          if(this.spawnTimer > 35){ 
+          if(this.spawnTimer > 30){ 
              this.spawn();
              this.spawnTimer = 0;
           }
 
-          // Update & Draw
-          this.ctx.font = "40px Arial";
+          this.ctx.font = "80px 'Segoe UI Emoji', 'Apple Color Emoji', sans-serif";
           this.ctx.textAlign = "center";
           this.ctx.textBaseline = "middle";
 
           for(let i = this.items.length - 1; i >= 0; i--){
             let item = this.items[i];
             item.y += item.speed * dt;
-            
             this.ctx.fillText(item.type, item.x, item.y);
-            
-            if(item.y > this.canvas.height + 50){
-              this.items.splice(i, 1);
-            }
+            if(item.y > h + 80) this.items.splice(i, 1);
+          }
+
+          this.ctx.fillStyle = "rgba(255, 255, 100, 0.5)";
+          for(let i = this.clickParticles.length - 1; i >= 0; i--){
+             let p = this.clickParticles[i];
+             this.ctx.beginPath();
+             this.ctx.arc(p.x, p.y, 15, 0, Math.PI*2);
+             this.ctx.fill();
+             p.life--;
+             if(p.life <= 0) this.clickParticles.splice(i, 1);
           }
 
           requestAnimationFrame((t) => this.loop(t));
@@ -1162,10 +1246,19 @@
           this.giftWrap = $("#giftWrap");
 
           this.finalCelebrateBtn = $("#finalCelebrateBtn");
+          this.mainContainer = $("#mainContainer");
 
           // Potlu popup
           this.potluOverlay = $("#potluOverlay");
           this.potluCloseBtn = $("#potluCloseBtn");
+
+          // David popup
+          this.davidOverlay = $("#davidOverlay");
+          this.davidCloseBtn = $("#davidCloseBtn");
+
+          // Final Poem
+          this.finalPoemOverlay = $("#finalPoemOverlay");
+          this.poemBox = $("#poemBox");
 
           this.fx = new FX($("#spark"), $("#confetti"));
 
@@ -1175,16 +1268,10 @@
           // Init Game
           this.cakeGame = new CakeGame(
             () => { // On Win
-               const r = this.giftWrap.getBoundingClientRect();
-               this.unlock(2, r.left + r.width/2, r.top + r.height/2, {
-                  emoji:"🎁",
-                  title:"Gift unlocked",
-                  text:"You crushed it! The real gift is you."
-               });
-               this.fx.sparkleBurst(r.left + r.width/2, r.top + r.height/2, 26);
+               this.davidOverlay.classList.add("show");
+               this.fx.confettiBurst(window.innerWidth/2, window.innerHeight/2, 50);
             }, 
             () => { // On Give Up
-               // Reset the ribbon so they can try again
                this.ribbonEl.classList.remove("unwrapped");
                this.ribbonEl.style.opacity = "1";
                this.ribbonEl.style.transform = "translateX(-50%)";
@@ -1222,22 +1309,15 @@
         }
 
         bindUI(){
-          // === THE FIX IS HERE ===
           this.enterBtn.addEventListener("click", () => {
-            // We search for the audio player dynamically
-            const audioPlayer = document.getElementById("bgm");
-            
-            // We try to play, but we wrap it in safety code so it CANNOT crash the site
-            if (audioPlayer) {
-              try {
-                audioPlayer.currentTime = 0;
-                audioPlayer.play().catch(e => console.log("Audio autoplay blocked (normal browser behavior):", e));
-              } catch (e) {
-                console.log("Audio error (ignored):", e);
-              }
+            const bgm = document.getElementById("bgm");
+            if (bgm) {
+                try {
+                   bgm.currentTime = 0;
+                   bgm.play().catch(() => {});
+                } catch(e){}
             }
 
-            // CRITICAL: This line will now ALWAYS run, letting you see the game
             this.splash.classList.add("hide");
             this.fx.sparkleBurst(window.innerWidth * 0.5, window.innerHeight * 0.35, 20);
             this.toast.show({ emoji:"👋", title:"Welcome", text:"Scroll down and find the 3 secrets." });
@@ -1252,16 +1332,26 @@
 
           this.waxStamp.addEventListener("click", () => this.openLetter());
 
+          // === UPDATED: Final Celebrate Button TRIGGERS POEM ===
           this.finalCelebrateBtn.addEventListener("click", () => {
-            this.fx.confettiBurst(window.innerWidth * 0.5, window.innerHeight * 0.35, 140);
-            setTimeout(() => this.fx.confettiBurst(window.innerWidth * 0.5, window.innerHeight * 0.65, 120), 240);
-            this.toast.show({ emoji:"🎉", title:"Celebrate!", text:"Confetti just for the finale." });
+             this.startFinalSequence();
           });
 
-          // potlu close
           this.potluCloseBtn.addEventListener("click", () => this.hidePotlu());
           this.potluOverlay.addEventListener("click", (e) => {
             if (e.target === this.potluOverlay) this.hidePotlu();
+          });
+
+          // David Close -> Then Unlock
+          this.davidCloseBtn.addEventListener("click", () => {
+             this.davidOverlay.classList.remove("show");
+             const r = this.giftWrap.getBoundingClientRect();
+             this.unlock(2, r.left + r.width/2, r.top + r.height/2, {
+                  emoji:"🎁",
+                  title:"Gift unlocked",
+                  text:"David approves! The real gift is you."
+             });
+             this.fx.sparkleBurst(r.left + r.width/2, r.top + r.height/2, 26);
           });
         }
 
@@ -1299,13 +1389,6 @@
         updateCounter(){
           this.foundCountEl.textContent = String(this.found.size);
           this.counterEl.classList.add("show");
-
-          if (this.found.size === 3){
-            this.toast.show({ emoji:"🏆", title:"All secrets found!", text:"Now hit Final Celebrate ✨" });
-            this.fx.confettiBurst(window.innerWidth * 0.5, window.innerHeight * 0.35, 140);
-            setTimeout(() => this.fx.confettiBurst(window.innerWidth * 0.35, window.innerHeight * 0.55, 100), 240);
-            setTimeout(() => this.fx.confettiBurst(window.innerWidth * 0.65, window.innerHeight * 0.55, 100), 440);
-          }
         }
 
         unlock(id, x = window.innerWidth * 0.5, y = window.innerHeight * 0.45, msg = null){
@@ -1316,8 +1399,45 @@
           if (msg) this.toast.show(msg);
         }
 
+        // --- FINAL SEQUENCE: Poem & Confetti ---
+        startFinalSequence() {
+            // 1. Fade out the main container content
+            this.mainContainer.classList.add("fade-out");
+            
+            // 2. Start infinite confetti
+            this.fx.startInfiniteConfetti();
+            
+            // 3. Show poem overlay
+            this.finalPoemOverlay.classList.add("show");
+
+            // 4. Typewriter Effect
+            const poemLines = [
+                "आजचा दिवस तुझ्यासाठी खास,",
+                "फुलांसारखं तुझं आयुष्य फुलावं, 🌸",
+                "प्रेमाने, सुखाने ते सजावं. 🌟",
+                "जन्मदिवसाच्या तुला लाख लाख शुभेच्छा,",
+                "देव तुझं नशिब उजळत राहो. 💫",
+                "आरोग्य, आनंद, समाधान लाभो,",
+                "वाढदिवसाच्या हार्दिक शुभेच्छा रुचा 🎉. ✨"
+            ];
+
+            let delay = 1000;
+            poemLines.forEach((line) => {
+                setTimeout(() => {
+                    const p = document.createElement("span");
+                    p.className = "poemLine";
+                    p.textContent = line;
+                    this.poemBox.appendChild(p);
+                    // trigger reflow
+                    void p.offsetWidth;
+                    p.classList.add("visible");
+                }, delay);
+                delay += 2500; // time between lines
+            });
+        }
+
         setupEasterEggs(){
-          // Egg 1: candles in order
+          // Egg 1: candles
           this.candlesEl.addEventListener("click", (e) => {
             const c = e.target.closest(".candle");
             if (!c) return;
@@ -1348,17 +1468,16 @@
 
           // Egg 2: ribbon drag -> TRIGGERS GAME
           new RibbonDrag(this.ribbonEl, () => {
-             // Instead of unlocking immediately, start the game
              this.cakeGame.start();
           });
 
-          // Egg 3: heart draw
+          // Egg 3: heart draw -> Just marks found
           new HeartGesture((center) => {
             if (this.found.has(3)) return;
             this.unlock(3, center.x, center.y, {
               emoji:"💖",
               title:"Heart found",
-              text:"That was cute. One more secret done."
+              text:"Now press the Final Celebrate button!"
             });
           });
         }
