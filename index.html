@@ -1203,7 +1203,7 @@
           this.splash = $("#splash");
           this.enterBtn = $("#enterBtn");
 
-          // Counter HTML elements are removed, so no JS reference is needed
+          // Counter Removed
 
           this.openLetterBtn = $("#openLetterBtn");
           this.overlay = $("#overlay");
@@ -1359,12 +1359,9 @@
           this.potluOverlay.classList.remove("show");
         }
 
-        // Counter function deleted completely to prevent crashing
-
         unlock(id, x = window.innerWidth * 0.5, y = window.innerHeight * 0.45, msg = null){
           if (this.found.has(id)) return;
           this.found.add(id);
-          // Counter update removed here
           this.fx.sparkleBurst(x, y, 22);
           if (msg) this.toast.show(msg);
         }
