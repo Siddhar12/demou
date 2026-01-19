@@ -75,7 +75,7 @@
     /* --- Layout --- */
     .container{ 
       width:min(980px, 92vw); margin:0 auto; 
-      transition: opacity 1.5s ease; /* Slow fade out */
+      transition: opacity 1.5s ease;
     }
     .container.fade-out {
         opacity: 0;
@@ -214,29 +214,6 @@
       margin-bottom: 18px;
       line-height: 1.4;
     }
-
-    /* --- Counter --- */
-    .counter{
-      position: fixed;
-      top: 16px; right: 16px;
-      padding: 10px 14px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(255,255,255,.06);
-      backdrop-filter: blur(14px);
-      color: rgba(232,214,167,.92);
-      font-size: 13px;
-      display:flex;
-      align-items:center;
-      gap:8px;
-      opacity:0;
-      transform: translateY(-8px);
-      transition: .35s var(--ease);
-      z-index: 2000;
-      user-select:none;
-    }
-    .counter.show{ opacity:1; transform: translateY(0); }
-    .counter b{ color: rgba(255,255,255,.90); font-weight:600; }
 
     /* --- Toast --- */
     .toast{
@@ -683,7 +660,6 @@
     </div>
   </div>
 
-
   <div class="toast" id="toast" aria-live="polite">
     <div class="toast-emoji" id="toastEmoji">✨</div>
     <div>
@@ -745,13 +721,15 @@
     <section>
       <div class="card reveal">
         <div class="title" style="font-size:54px;margin-bottom:6px;">One last secret</div>
-      
+        <div class="subtitle">Draw a <b>heart</b> anywhere on the screen (mouse/touch)</div>
 
         <div class="row">
-          <button class="btn" id="finalCelebrateBtn">Final Celebration ✨</button>
+          <button class="btn" id="finalCelebrateBtn">Final Celebrate ✨</button>
         </div>
 
-        
+        <div class="subtitle" style="margin-top:10px; margin-bottom:0;">
+          Confetti will pop at the end — not everywhere.
+        </div>
       </div>
     </section>
 
@@ -792,6 +770,7 @@
               May this year treat you gently — and may you always feel proud of the person you’re becoming.<br/><br/>
               Always cheering for you,<br/>
               your Bugdi Lover ,<br/>
+              Sid
               <span style="font-family:Allura,cursive; font-size:40px;">Sid</span>
             </div>
 
@@ -1224,8 +1203,7 @@
           this.splash = $("#splash");
           this.enterBtn = $("#enterBtn");
 
-          this.counterEl = $("#counter");
-          this.foundCountEl = $("#foundCount");
+          // Counter HTML elements are removed, so no JS reference is needed
 
           this.openLetterBtn = $("#openLetterBtn");
           this.overlay = $("#overlay");
@@ -1381,15 +1359,12 @@
           this.potluOverlay.classList.remove("show");
         }
 
-        updateCounter(){
-          this.foundCountEl.textContent = String(this.found.size);
-          this.counterEl.classList.add("show");
-        }
+        // Counter function deleted completely to prevent crashing
 
         unlock(id, x = window.innerWidth * 0.5, y = window.innerHeight * 0.45, msg = null){
           if (this.found.has(id)) return;
           this.found.add(id);
-          this.updateCounter();
+          // Counter update removed here
           this.fx.sparkleBurst(x, y, 22);
           if (msg) this.toast.show(msg);
         }
@@ -1408,12 +1383,13 @@
             // 4. Typewriter Effect
             const poemLines = [
                 "आजचा दिवस तुझ्यासाठी खास,",
+                "हसत राहो, मिळो यश अपार. 🎂",
                 "फुलांसारखं तुझं आयुष्य फुलावं, 🌸",
                 "प्रेमाने, सुखाने ते सजावं. 🌟",
                 "जन्मदिवसाच्या तुला लाख लाख शुभेच्छा,",
-                "देव तुझं नशिब उजळत राहो. 💫",
+                "देव तुझं नशिब उजळत राहो दिवा. 💫",
                 "आरोग्य, आनंद, समाधान लाभो,",
-                "वाढदिवसाच्या हार्दिक शुभेच्छा रुचा 🎉. ✨"
+                "तुझ्या वाटचालीत शुभ वेळा वाहो. ✨"
             ];
 
             let delay = 1000;
@@ -1483,10 +1459,3 @@
   </script>
 </body>
 </html>
-
-
-
-
-
-
-
