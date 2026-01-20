@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
   <title>For Rucha ✨</title>
@@ -1452,31 +1452,7 @@
     })();
     // ... (All your existing classes: Toast, FX, CakeGame, etc. remain exactly the same) ...
 
-      /* --- SUPABASE VISITOR TRACKER --- */
-      async function logVisit() {
-        // REPLACE THESE WITH YOUR ACTUAL SUPABASE KEYS
-        const SUPABASE_URL = 'https://ohcnhpnkxpkpuhiyfirw.supabase.co';
-        const SUPABASE_KEY = 'sb_publishable_l8BqLvcXIv0PDacbK08VMg_baQ2-lwG';
-
-        if (SUPABASE_URL === 'YOUR_SUPABASE_PROJECT_URL_HERE') {
-            console.log("Supabase not configured yet.");
-            return;
-        }
-
-        const { createClient } = supabase;
-        const _supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
-
-        // Insert a new row. The 'created_at' timestamp is added automatically by the database.
-        const { error } = await _supabase
-          .from('visits')
-          .insert({});
-
-        if (error) {
-            console.error('Error logging visit:', error);
-        } else {
-            console.log('Visit logged to database!');
-        }
-      }
+      
 
       /* Main App */
       class App {
@@ -1495,6 +1471,7 @@
   </script>
 </body>
 </html>
+
 
 
 
