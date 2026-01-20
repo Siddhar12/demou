@@ -1,8 +1,6 @@
 <!doctype html>
 <html lang="en">
 <head>
-
-
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
   <title>For Rucha ✨</title>
@@ -723,13 +721,15 @@
     <section>
       <div class="card reveal">
         <div class="title" style="font-size:54px;margin-bottom:6px;">One last secret</div>
-       
+        <div class="subtitle">Draw a <b>heart</b> anywhere on the screen (mouse/touch)</div>
 
         <div class="row">
           <button class="btn" id="finalCelebrateBtn">Final Celebrate ✨</button>
         </div>
 
-      
+        <div class="subtitle" style="margin-top:10px; margin-bottom:0;">
+          Confetti will pop at the end — not everywhere.
+        </div>
       </div>
     </section>
 
@@ -770,7 +770,7 @@
               May this year treat you gently — and may you always feel proud of the person you’re becoming.<br/><br/>
               Always cheering for you,<br/>
               your Bugdi Lover ,<br/>
-              
+              Sid
               <span style="font-family:Allura,cursive; font-size:40px;">Sid</span>
             </div>
 
@@ -1203,7 +1203,7 @@
           this.splash = $("#splash");
           this.enterBtn = $("#enterBtn");
 
-          // Counter Removed
+          // Counter removed from here
 
           this.openLetterBtn = $("#openLetterBtn");
           this.overlay = $("#overlay");
@@ -1379,11 +1379,12 @@
 
             // 4. Typewriter Effect
             const poemLines = [
-                   "आजचा दिवस तुझ्यासाठी खास,",
+                "आजचा दिवस तुझ्यासाठी खास,",
                 "फुलांसारखं तुझं आयुष्य फुलावं, 🌸",
                 "प्रेमाने, सुखाने ते सजावं. 🌟",
                 "आरोग्य, आनंद, समाधान लाभो,",
-                "वाढदिवसाच्या हार्दिक शुभेच्छा रुचा 🎉""
+                "वाढदिवसाच्या हार्दिक शुभेच्छा रुचा 🎉"
+            
             ];
 
             let delay = 1000;
@@ -1450,29 +1451,6 @@
 
       new App();
     })();
-    // ... (All your existing classes: Toast, FX, CakeGame, etc. remain exactly the same) ...
-
-      
-
-      /* Main App */
-      class App {
-        constructor(){
-          // ... existing constructor code ...
-          
-          this.buildStars(120);
-          this.setupRevealObserver();
-          this.bindUI();
-          this.setupEasterEggs();
-
-          // TRIGGER THE LOGGING IMMEDIATELY WHEN APP STARTS
-          logVisit(); 
-        }
-        // ... rest of class App ...
   </script>
 </body>
 </html>
-
-
-
-
-
